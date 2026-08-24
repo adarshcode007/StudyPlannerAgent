@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Countdown Planner - Agentic AI</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <i class="fa-solid fa-hourglass-half glow-icon"></i>
+                <h1>Chronos<span>Planner</span></h1>
+            </div>
+            <p class="subtitle">AI-Powered Exam Countdown & Catch-Up Shuffle</p>
+        </header>
+
+        <!-- Main Content Grid -->
+        <div class="main-grid">
+            <!-- Left Panel: Configurations -->
+            <section class="panel config-panel glass">
+                <div class="panel-header">
+                    <i class="fa-solid fa-sliders"></i>
+                    <h2>Setup Planner</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="input-group">
+                        <label for="session-id">Session ID</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-key"></i>
+                            <input type="text" id="session-id" placeholder="Enter session name..." value="demo_session_1">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="exam-date">Exam Date</label>
+                        <div class="input-with-icon">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <input type="date" id="exam-date">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="topics">Study Topics (One per line or comma-separated)</label>
+                        <textarea id="topics" rows="5" placeholder="Algebra&#10;Chemistry&#10;History&#10;Biology&#10;Grammar"></textarea>
+                    </div>
+
+                    <div class="button-row">
+                        <button id="btn-init" class="btn primary-btn">
+                            <i class="fa-solid fa-calendar-plus"></i> Generate Plan
+                        </button>
+                        <button id="btn-reset" class="btn secondary-btn">
+                            <i class="fa-solid fa-trash-can"></i> Reset State
+                        </button>
+                    </div>
+
+                    <div class="session-info-card glass-inner hidden" id="session-info">
+                        <h3>Active Schedule</h3>
+                        <div class="info-row">
+                            <span>Exam Date:</span>
+                            <strong id="info-exam-date">-</strong>
+                        </div>
+                        <div class="info-row">
+                            <span>Days Remaining:</span>
+                            <strong id="info-days-left">-</strong>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: AI Thought Chamber -->
+            <section class="panel console-panel glass">
+                <div class="panel-header">
+                    <div class="header-left">
+                        <i class="fa-solid fa-brain"></i>
+                        <h2>AI Thought Chamber</h2>
+                    </div>
+                    <div class="status-indicator">
+                        <span class="status-dot green"></span>
+                        <span class="status-text">Agent Idle</span>
+                    </div>
+                </div>
+                <div class="panel-body console-body" id="console-logs">
+                    <div class="console-welcome">
+                        <p class="console-prompt">> Initialize plan above. AI Agent's execution trace will appear here in real-time...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Bottom Panel: Study Timeline -->
+        <section class="panel timeline-section glass">
+            <div class="panel-header">
+                <i class="fa-solid fa-timeline"></i>
+                <h2>Study Timeline</h2>
+                <div class="timeline-summary hidden" id="timeline-summary">
+                    <span class="badge completed-badge"><i class="fa-solid fa-check-double"></i> <span id="count-completed">0</span> Completed</span>
+                    <span class="badge missed-badge"><i class="fa-solid fa-circle-exclamation"></i> <span id="count-missed">0</span> Missed</span>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div id="timeline-deck" class="timeline-deck">
+                    <div class="empty-timeline">
+                        <i class="fa-solid fa-calendar-xmark"></i>
+                        <p>No active study plan. Define settings above and click "Generate Plan".</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Error/Notification Toast -->
+    <div class="toast hidden" id="toast">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span id="toast-message">Error message goes here</span>
+    </div>
+
+    <!-- Overlay Loader -->
+    <div class="loader-overlay hidden" id="loader">
+        <div class="loader">
+            <div class="spinner"></div>
+            <p>AI Agent thinking...</p>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
