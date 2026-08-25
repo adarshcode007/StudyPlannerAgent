@@ -113,14 +113,40 @@ def round_robin_allocate(topics: list[str], days: list[str]) -> dict[str, list[s
     plan = {d: [] for d in days}
     if not topics:
         return plan
+    
+    # 1. Distribute core study topics round-robin
     for i, topic in enumerate(topics):
         day = days[i % len(days)]
         plan[day].append(topic)
     
-    # if topics ran out before days did, fill remaining empty days with "Review / buffer"
+    # Fill remaining empty days with "Review / buffer"
     for d in days:
         if not plan[d]:
             plan[d] = ["Review / buffer"]
+            
+    # 2. Add periodic revision of the previous topics (scheduled 3 and 7 days later)
+    for i, d in enumerate(days):
+        core_topics = [t for t in plan[d] if t != "Review / buffer" and not t.startswith("[Revise]")]
+        if core_topics:
+            # 3 days later
+            if i + 3 < len(days):
+                rev_day = days[i + 3]
+                if plan[rev_day] == ["Review / buffer"]:
+                    plan[rev_day] = []
+                for ct in core_topics:
+                    rev_task = f"[Revise] {ct}"
+                    if rev_task not in plan[rev_day]:
+                        plan[rev_day].append(rev_task)
+            # 7 days later
+            if i + 7 < len(days):
+                rev_day = days[i + 7]
+                if plan[rev_day] == ["Review / buffer"]:
+                    plan[rev_day] = []
+                for ct in core_topics:
+                    rev_task = f"[Revise] {ct}"
+                    if rev_task not in plan[rev_day]:
+                        plan[rev_day].append(rev_task)
+                        
     return plan
 
 def allocate_topics(session_id: str, topics: list[str]) -> dict:
@@ -196,10 +222,10 @@ def handle_missed_day(session_id: str, missed_day: str) -> dict:
         is_today_or_later = day_d >= today_d
         is_missed = day_label in missed_days
         
-        # Collect topics from missed day or future uncompleted days
+        # Collect topics from missed day or future uncompleted days (excluding revisions)
         if day_label == missed_day or (is_today_or_later and not is_missed):
             for t in day_topics:
-                if t != "Review / buffer" and t != "Missed" and t not in topics_to_reallocate:
+                if t != "Review / buffer" and t != "Missed" and not t.startswith("[Revise]") and t not in topics_to_reallocate:
                     topics_to_reallocate.append(t)
         
         # Remaining study days: today-or-later, not completed, not missed

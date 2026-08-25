@@ -18,6 +18,8 @@ const elInfoDaysLeft = document.getElementById("info-days-left");
 const elTimelineSummary = document.getElementById("timeline-summary");
 const elCountCompleted = document.getElementById("count-completed");
 const elCountMissed = document.getElementById("count-missed");
+const elConsoleInput = document.getElementById("console-input");
+const elBtnSendMsg = document.getElementById("btn-send-msg");
 
 // Set default exam date: 15 days from today
 const defaultDate = new Date();
@@ -34,6 +36,23 @@ elSessionId.addEventListener("change", (e) => {
     activeSessionId = e.target.value.trim() || "demo_session_1";
     loadSessionState();
 });
+elBtnSendMsg.addEventListener("click", handleSendChatMessage);
+elConsoleInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" && !elConsoleInput.disabled) {
+        handleSendChatMessage();
+    }
+});
+
+// Manage chat input activation states
+function setConsoleInputState(enabled) {
+    elConsoleInput.disabled = !enabled;
+    elBtnSendMsg.disabled = !enabled;
+    if (enabled) {
+        elConsoleInput.placeholder = "Type your reply to the AI agent...";
+    } else {
+        elConsoleInput.placeholder = "Agent is active or not yet initialized...";
+    }
+}
 
 // Toast Notifications
 function showToast(msg) {
@@ -84,6 +103,7 @@ async function handleInitPlan() {
     const promptMessage = `My exam is on ${dateVal}. I need to study these topics: ${topicsStr}.`;
 
     setLoaderState(true);
+    setConsoleInputState(false);
     try {
         const response = await fetch("/chat", {
             method: "POST",
@@ -100,12 +120,12 @@ async function handleInitPlan() {
         }
 
         const data = await response.json();
-        // Hide loader early so user can watch the Thought Chamber type out logs in real-time
         setLoaderState(false);
         
         await renderAgentTrace(data.trace);
         renderTimeline(data.state);
         updateStatistics(data.state);
+        setConsoleInputState(true);
         
         if (data.final_answer.startsWith("Groq API key")) {
             showToast(data.final_answer);
@@ -114,6 +134,7 @@ async function handleInitPlan() {
         showToast(err.message);
         console.error(err);
         setLoaderState(false);
+        setConsoleInputState(false);
     }
 }
 
@@ -121,6 +142,7 @@ async function handleInitPlan() {
 async function handleResetSession() {
     const sessionId = getSessionId();
     setLoaderState(true);
+    setConsoleInputState(false);
     try {
         const response = await fetch("/reset", {
             method: "POST",
@@ -167,12 +189,14 @@ async function loadSessionState() {
             elTopics.value = state.topics.join("\n");
             renderTimeline(state);
             updateStatistics(state);
+            setConsoleInputState(true);
             
             elConsoleLogs.innerHTML = `<div class="console-welcome"><p class="console-prompt">> Loaded existing state for session '${sessionId}'. Ready.</p></div>`;
         } else {
             // State is empty
             elSessionInfo.classList.add("hidden");
             elTimelineSummary.classList.add("hidden");
+            setConsoleInputState(false);
             elTimelineDeck.innerHTML = `
                 <div class="empty-timeline">
                     <i class="fa-solid fa-calendar-xmark"></i>
@@ -188,6 +212,7 @@ async function loadSessionState() {
 async function completeDay(dayLabel) {
     const sessionId = getSessionId();
     setLoaderState(true);
+    setConsoleInputState(false);
     try {
         const response = await fetch("/chat", {
             method: "POST",
@@ -206,9 +231,11 @@ async function completeDay(dayLabel) {
         await renderAgentTrace(data.trace);
         renderTimeline(data.state);
         updateStatistics(data.state);
+        setConsoleInputState(true);
     } catch (err) {
         showToast(err.message);
         setLoaderState(false);
+        setConsoleInputState(true);
     }
 }
 
@@ -216,6 +243,7 @@ async function completeDay(dayLabel) {
 async function missDay(dayLabel) {
     const sessionId = getSessionId();
     setLoaderState(true);
+    setConsoleInputState(false);
     try {
         const response = await fetch("/chat", {
             method: "POST",
@@ -234,9 +262,51 @@ async function missDay(dayLabel) {
         await renderAgentTrace(data.trace);
         renderTimeline(data.state);
         updateStatistics(data.state);
+        setConsoleInputState(true);
     } catch (err) {
         showToast(err.message);
         setLoaderState(false);
+        setConsoleInputState(true);
+    }
+}
+
+// 6. Send Custom Chat Message
+async function handleSendChatMessage() {
+    const sessionId = getSessionId();
+    const msgText = elConsoleInput.value.trim();
+    if (!msgText) return;
+
+    elConsoleInput.value = "";
+    setLoaderState(true);
+    setConsoleInputState(false);
+
+    try {
+        const response = await fetch("/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                session_id: sessionId,
+                message: msgText
+            })
+        });
+
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.detail || "Server error occurred");
+        }
+
+        const data = await response.json();
+        setLoaderState(false);
+
+        await renderAgentTrace(data.trace);
+        renderTimeline(data.state);
+        updateStatistics(data.state);
+        setConsoleInputState(true);
+    } catch (err) {
+        showToast(err.message);
+        console.error(err);
+        setLoaderState(false);
+        setConsoleInputState(true);
     }
 }
 

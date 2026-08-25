@@ -65,7 +65,15 @@ def run_agent(session_id: str, user_message: str) -> dict:
         "3. When a user reports missing a day (e.g., 'I missed Day 3', 'I skipped Day 2', 'I was sick on Day 4'), you must use the `handle_missed_day` tool with the exact day label (e.g. 'Day 3 (YYYY-MM-DD)'). Check the session state to find the exact day label corresponding to the missed day.\n"
         "4. When a user reports completing a day, call `mark_day_completed` with the exact day label.\n"
         "5. Always reason briefly about what you are going to do before calling a tool. Explain your thought process in your thoughts, but let the tool do the heavy lifting.\n"
-        "6. Do not mention session_id to the user. That is managed automatically by the system."
+        "6. Do not mention session_id to the user. That is managed automatically by the system.\n"
+        "7. VAGUE TOPICS / BROAD SUBJECTS BREAKDOWN:\n"
+        "   - Category A: Super-Broad Subjects (e.g., 'Math', 'Science', 'History', 'Biology', 'Chemistry', 'Physics', 'Computer Science'): Do NOT call `allocate_topics` or automatically generate subtopics. These are too wide! Halt immediately and ask the user which specific topics, chapters, or eras they want to study within these subjects (e.g., for History: 'World War I', 'French Revolution'; for Chemistry: 'Organic Chemistry', 'Stoichiometry'). Propose examples and wait for their input.\n"
+        "   - Category B: Manageable Topics (e.g., 'Algebra', 'Grammar', 'Rotational Motion', 'Organic Chemistry', 'World War I', 'Geometry'): These are specific enough to be auto-divided. Automatically divide each into 3 concrete, bite-sized study subtopics for mastery. For example:\n"
+        "     * Algebra -> 'linear expressions', 'quadratic expressions', 'functions and graphs'\n"
+        "     * Rotational Motion -> 'Moment of Inertia', 'Torque & Angular Acceleration', 'Conservation of Angular Momentum'\n"
+        "     * Grammar -> 'parts of speech & sentence structure', 'active vs passive voice', 'tenses & agreement'\n"
+        "     - Rule for Small Topics: If two subtopics are small, simple, or closely related, you should combine them into a single string (e.g., 'linear expressions & quadratic expressions') so the planner schedules them on the same day.\n"
+        "     Compile the resulting subtopics list (combining grouped items) and call `allocate_topics`. In your final response, list the subtopics you generated and explain how they were structured."
     )
     
     for step in range(MAX_STEPS):

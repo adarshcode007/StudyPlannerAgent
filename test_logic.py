@@ -29,12 +29,13 @@ def run_tests():
     # Tomorrow is Day 1 (2026-08-25).
     # Day 1: Algebra, Day 2: Chemistry, Day 3: History, Day 4: Biology, Day 5: Grammar.
     # Day 6 to 22 should be "Review / buffer" because topics ran out before days did.
+    # [Revise] tasks are added 3 and 7 days after the core topic day.
     assert plan["Day 1 (2026-08-25)"] == ["Algebra"]
     assert plan["Day 2 (2026-08-26)"] == ["Chemistry"]
     assert plan["Day 3 (2026-08-27)"] == ["History"]
-    assert plan["Day 4 (2026-08-28)"] == ["Biology"]
-    assert plan["Day 5 (2026-08-29)"] == ["Grammar"]
-    assert plan["Day 6 (2026-08-30)"] == ["Review / buffer"]
+    assert plan["Day 4 (2026-08-28)"] == ["Biology", "[Revise] Algebra"]
+    assert plan["Day 5 (2026-08-29)"] == ["Grammar", "[Revise] Chemistry"]
+    assert plan["Day 6 (2026-08-30)"] == ["[Revise] History"]
     print("allocate_topics OK.")
     
     print("\n=== Testing mark_day_completed ===")
@@ -46,8 +47,6 @@ def run_tests():
     
     print("\n=== Testing handle_missed_day (Reshuffle) ===")
     # Today is overridden to 2026-08-24. But let's say tomorrow we miss Day 2 (which is 2026-08-26).
-    # Wait, today is 2026-08-24. We can still call handle_missed_day for Day 2.
-    # Let's call handle_missed_day for Day 2 (2026-08-26) - which is in the future relative to today 2026-08-24.
     # Topics to reshuffle: Chemistry (from Day 2), History (Day 3), Biology (Day 4), Grammar (Day 5).
     # Note: Day 1 (Algebra) is completed, so it won't be touched.
     # Remaining days: Day 2 is missed. So remaining days are Day 3 to Day 22 (20 days).
@@ -62,12 +61,13 @@ def run_tests():
     
     # Chemistry, History, Biology, Grammar should be allocated starting Day 3.
     # 4 topics over 20 days (Day 3 to Day 22).
-    # Day 3: Chemistry, Day 4: History, Day 5: Biology, Day 6: Grammar, Day 7+: Review / buffer.
+    # Day 3: Chemistry, Day 4: History, Day 5: Biology, Day 6: Grammar.
+    # Revision tasks are automatically added 3 and 7 days after they are studied in remaining_days.
     assert new_plan["Day 3 (2026-08-27)"] == ["Chemistry"]
     assert new_plan["Day 4 (2026-08-28)"] == ["History"]
     assert new_plan["Day 5 (2026-08-29)"] == ["Biology"]
-    assert new_plan["Day 6 (2026-08-30)"] == ["Grammar"]
-    assert new_plan["Day 7 (2026-08-31)"] == ["Review / buffer"]
+    assert new_plan["Day 6 (2026-08-30)"] == ["Grammar", "[Revise] Chemistry"]
+    assert new_plan["Day 7 (2026-08-31)"] == ["[Revise] History"]
     
     print("handle_missed_day OK.")
     
